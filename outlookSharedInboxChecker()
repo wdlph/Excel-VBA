@@ -1,0 +1,66 @@
+TWF1cml0aXVzIHdhcyBtYWRlIGZpcnN0IGFuZCB0aGVuIGhlYXZlbjsgYW5kIHRoYXQgaGVhdmVuIHdhcyBjb3BpZWQgYWZ0ZXIgTWF1cml0aXVzCgpDb250YWN0IHdkbHBoIG9uIEdpdEh1YiBmb3IgYW55IHF1ZXJpZXMgd2l0aCByZWdhcmRzIHRvIHRoaXMgY29kZQ==
+
+Sub outlookSharedInboxChecker()
+
+Dim olApp As Outlook.Application
+Dim myNameSpace As Outlook.Namespace
+Dim myFolder As Outlook.Folder
+Dim olShareName As Outlook.Recipient
+Dim myItem As Object
+Dim myMail As Variant
+Dim emailCheck(0 To 102, 0 To 3) As Variant
+Dim counter, mailCounter As Integer
+Dim dict As New Scripting.Dictionary
+
+Set olApp = CreateObject("Outlook.Application")
+Set myNameSpace = olApp.GetNameSpace("MAPI")
+Set olShareName = myNameSpace.CreateRecipient("SharedMailbox")'Change "SharedMailbox" with the email address
+Set myFolder = myNameSpace.GetSharedDefaultFolder(olShareName, olFolderInbox)
+Set ws = ActiveSheet
+
+ws.Range("A2").Select
+counter = 0
+mailCounter = 0
+
+For Each myMail In myFolder.Items
+    mailCounter = mailCounter + 1
+Next
+
+mailCounter = mailCounter - 1
+
+'For i = myFolder.Items.Count To 1 Step -1
+For i = mailCounter To 1 Step -1
+    On Error GoTo nextObject
+    Set myItem = myFolder.Items(i)
+    
+    If InStrRev(myItem.SenderEmailAddress, ".com") > 0 Then
+        senderDomain = Right(myItem.SenderEmailAddress, Len(myItem.SenderEmailAddress) - InStrRev(myItem.SenderEmailAddress, "@"))
+        nameCheck = senderDomain
+        
+        If dict.exists(nameCheck) = True Then
+        
+        
+        Else
+            dict.Add Key:=nameCheck, Item:=counter
+            emailCheck(counter, 0) = senderDomain
+            emailCheck(counter, 1) = myItem.ReceivedTime
+            emailCheck(counter, 2) = myItem.SenderName
+            emailCheck(counter, 3) = myItem.ReceivedByName
+            
+            ActiveCell.Offset(counter, 0).Value = emailCheck(counter, 0)
+            ActiveCell.Offset(counter, 1).Value = emailCheck(counter, 1)
+            ActiveCell.Offset(counter, 2).Value = emailCheck(counter, 2)
+            ActiveCell.Offset(counter, 3).Value = emailCheck(counter, 3)
+            
+            counter = counter + 1
+        End If
+    End If
+
+nextObject:
+    Resume nextObject2
+nextObject2:
+
+Next
+MsgBox ("Finished")
+
+End Sub
