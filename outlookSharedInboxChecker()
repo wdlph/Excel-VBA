@@ -59,7 +59,7 @@ For i = mailCounter To 1 Step -1
 nextObject:
     Resume nextObject2
 nextObject2:
-
+ 
 Next
 MsgBox ("Finished")
 
